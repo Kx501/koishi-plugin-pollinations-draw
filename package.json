@@ -1,22 +1,43 @@
 {
   "name": "@kx501/koishi-plugin-pollinations-draw",
-  "description": "使用PollinationsAI平台的API画画",
-  "version": "0.0.1",
+  "description": "PollinationsAI Draw 的简单实现",
+  "version": "1.0.0",
+  "contributors": [
+    "kx501 <x501@foxmail.com>"
+  ],
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
     "lib",
     "dist"
   ],
+  "homepage": "https://github.com/Kx501/koishi-plugin-pollinations-draw",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kx501/koishi-plugin-pollinations-draw.git"
+  },
   "license": "MIT",
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
-    "plugin"
+    "plugin",
+    "pollinations",
+    "draw",
+    "ai"
   ],
-  "devDependencies": {},
   "peerDependencies": {
     "koishi": "4.18.7"
+  },
+  "koishi": {
+    "service": {
+      "required": [
+        "http"
+      ],
+      "optional": [
+        "translator"
+      ]
+    },
+    "preview": true,
+    "hidden": true
   }
 }
