@@ -35,6 +35,7 @@ export interface Config {
     sourceLang?: string;
     targetLang?: string;
   };
+  timeout: number;
 }
 
 export const Config: Schema<Config> = Schema.intersect([
@@ -67,19 +68,19 @@ export const Config: Schema<Config> = Schema.intersect([
         Schema.object({}),
       ]),
     ]),
+    timeout: Schema.number().default(30000).description("超时时间"),
   }),
 ]).description("插件配置");
 
 export function apply(ctx: Context, config: Config) {
   ctx
     .command("pd <prompt:text>", "使用 Pollinations.AI 生成图片")
-    .option("width", "-w <width:number>", { fallback: config.defaultWidth })
-    .option("height", "-hi <height:number>", { fallback: config.defaultHeight })
-    .option("seed", "-s <seed:number>", { fallback: Random.int(0, 999999999) })
-    .option("model", "-m <model:string>", { fallback: config.defaultModel })
-    .option("enhance", "-e", { type: "boolean", fallback: config.enableEnhance })
-    .option("nologo", "-n", { type: "boolean", fallback: config.nologo })
-    .option("safe", "--safe", { type: "boolean", fallback: config.safe })
+    .usage(`pd -[选项] <提示词>`)
+    .option("size", "-z <宽x高:string>", { fallback: config.defaultWidth + 'x' + config.defaultHeight })
+    .option("seed", "-s <种子:number>", { fallback: Random.int(0, 999999999) })
+    .option("model", "-m <模型:string>", { fallback: config.defaultModel })
+    .option("enhance", "-e 提示词增强", { type: "boolean", fallback: config.enableEnhance })
+    .option("nologo", "-n 无水印", { type: "boolean", fallback: config.nologo })
     .action(async ({ session, options }, prompt) => {
       if (!prompt) return "请输入图片描述";
 
@@ -101,15 +102,18 @@ export function apply(ctx: Context, config: Config) {
         }
 
         // 构造请求参数
+        const sizeRegex = /[xX×,，*]/;
+        const [width, height] = options.size.split(sizeRegex).map(s => s.trim());
+
         const params = new URLSearchParams({
           private: "true",
           model: options.model,
-          width: options.width.toString(),
-          height: options.height.toString(),
+          width: width,
+          height: height,
           enhance: options.enhance ? "true" : "false",
           seed: options.seed.toString(),
           nologo: options.nologo ? "true" : "false",
-          safe: options.safe ? "true" : "false",
+          safe: config.safe.toString(),
         });
 
         // 编码提示词并构造URL
@@ -117,17 +121,18 @@ export function apply(ctx: Context, config: Config) {
         const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?${params}`;
 
         // 发送请求
+        // 添加超时处理
         const response = await ctx.http.get(url, {
           responseType: "arraybuffer",
           headers: { Accept: "image/*" },
+          timeout: config.timeout
         });
 
         if (config.output === "详细信息")
           return (`
 ${h.image(Buffer.from(response), "image/png")}
 模型：${options.model}
-宽度：${options.width}
-高度：${options.height}
+宽高：${width}x${height}
 种子：${options.seed}
           `);
         else return h.image(Buffer.from(response), "image/png");
