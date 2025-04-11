@@ -1,7 +1,7 @@
 {
   "name": "@kx501/koishi-plugin-pollinations-draw",
   "description": "PollinationsAI Draw 的简单实现",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "contributors": [
     "kx501 <x501@foxmail.com>"
   ],

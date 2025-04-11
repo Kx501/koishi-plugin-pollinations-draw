@@ -77,7 +77,7 @@ export function apply(ctx: Context, config: Config) {
     .command("pd <prompt:text>", "使用 Pollinations.AI 生成图片")
     .usage(`pd -[选项] <提示词>`)
     .option("size", "-z <宽x高:string>", { fallback: config.defaultWidth + 'x' + config.defaultHeight })
-    .option("seed", "-s <种子:number>", { fallback: Random.int(0, 999999999) })
+    .option("seed", "-s <种子:number>")
     .option("model", "-m <模型:string>", { fallback: config.defaultModel })
     .option("enhance", "-e 提示词增强", { type: "boolean", fallback: config.enableEnhance })
     .option("nologo", "-n 无水印", { type: "boolean", fallback: config.nologo })
@@ -111,7 +111,7 @@ export function apply(ctx: Context, config: Config) {
           width: width,
           height: height,
           enhance: options.enhance ? "true" : "false",
-          seed: options.seed.toString(),
+          seed: options?.seed.toString() || Random.int(0, 999999999).toString(),
           nologo: options.nologo ? "true" : "false",
           safe: config.safe.toString(),
         });
