@@ -77,7 +77,7 @@ export function apply(ctx: Context, config: Config) {
     .command("pd <prompt:text>", "使用 Pollinations.AI 生成图片")
     .usage(`pd -[选项] <提示词>`)
     .option("size", "-z <宽x高:string>", { fallback: config.defaultWidth + 'x' + config.defaultHeight })
-    .option("seed", "-s <种子:number>")
+    .option("seed", "-s <种子:string>")
     .option("model", "-m <模型:string>", { fallback: config.defaultModel })
     .option("enhance", "-e 提示词增强", { type: "boolean", fallback: config.enableEnhance })
     .option("nologo", "-n 无水印", { type: "boolean", fallback: config.nologo })
@@ -104,6 +104,7 @@ export function apply(ctx: Context, config: Config) {
         // 构造请求参数
         const sizeRegex = /[xX×,，*]/;
         const [width, height] = options.size.split(sizeRegex).map(s => s.trim());
+        const seed = options?.seed || Random.int(0, 999999999).toString()
 
         const params = new URLSearchParams({
           private: "true",
@@ -111,7 +112,7 @@ export function apply(ctx: Context, config: Config) {
           width: width,
           height: height,
           enhance: options.enhance ? "true" : "false",
-          seed: options?.seed.toString() || Random.int(0, 999999999).toString(),
+          seed: seed,
           nologo: options.nologo ? "true" : "false",
           safe: config.safe.toString(),
         });
@@ -133,7 +134,7 @@ export function apply(ctx: Context, config: Config) {
 ${h.image(Buffer.from(response), "image/png")}
 模型：${options.model}
 宽高：${width}x${height}
-种子：${options.seed}
+种子：${seed}
           `);
         else return h.image(Buffer.from(response), "image/png");
       } catch (error) {
